@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.AnchorPane?>
+
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="609.0" prefWidth="412.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="sample.Controller">
+   <children>
+      <TextField fx:id="gui_input_ip" layoutX="66.0" layoutY="57.0" prefHeight="25.0" prefWidth="121.0" promptText="127.0.0.1" text="127.0.0.1" />
+      <TextField fx:id="gui_input_port" layoutX="199.0" layoutY="57.0" prefHeight="25.0" prefWidth="53.0" promptText="27015" text="27015" />
+      <Button fx:id="gui_button_connect" layoutX="265.0" layoutY="57.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="81.0" text="Connect" />
+      <TextArea fx:id="gui_field_log" layoutX="67.0" layoutY="220.0" prefHeight="357.0" prefWidth="278.0" />
+      <TextArea fx:id="gui_field_status" layoutX="67.0" layoutY="112.0" prefHeight="81.0" prefWidth="278.0" />
+      <Label layoutX="173.0" layoutY="31.0" text="IP : PORT" />
+      <Label layoutX="177.0" layoutY="89.0" text="STATUS" />
+      <Label layoutX="186.0" layoutY="198.0" text="LOG" />
+   </children>
+</AnchorPane>

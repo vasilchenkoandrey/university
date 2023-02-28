@@ -1,0 +1,15 @@
+void mousePosition(int mX, int mY) {
+	regs.r_cx = mX;
+	regs.r_dx = mY;
+	intrMouse(4);
+}
+
+int clickMouse(int mB) {
+	if (mB == 1) {
+		if (mB != 1) {
+			return 0;
+		}
+	}
+}
+
+if (clickMouse(mB)) count << "Click";

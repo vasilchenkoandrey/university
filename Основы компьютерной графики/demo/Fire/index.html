@@ -1,0 +1,124 @@
+<!doctype html> 
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+		<title>Vasilchenko | Fire - Demo Scene</title>
+		<style type="text/css">
+			body {
+				background-color: #000000;
+				margin: 0px;
+			}
+			canvas {
+				display: block;
+				image-rendering: pixelated;
+			}
+		</style>
+	</head>
+	<body>	
+		<canvas id='container'></canvas>
+		<script type="text/javascript">
+
+			// Параметры детализации
+			var QUALITY = 5;
+			var WIDTH = Math.floor(window.innerWidth / QUALITY);
+			var HEIGHT = Math.floor(window.innerHeight / QUALITY);
+			var SIZE = WIDTH * HEIGHT;
+
+
+			var context, image, data,
+			buffer1, buffer2, turbulence,
+
+			isUserInteracting, pointers, count = 0;
+
+			init();
+
+			// Функция инициализации
+			function init() {
+
+				var container, canvas;
+				// Метод document.getElementById() возвращает ссылку на элемент, который имеет атрибут id с указанным значением.
+				var canvas = document.getElementById("container");
+
+				// Параметры холста
+				canvas.width = WIDTH;
+				canvas.height = HEIGHT;
+				canvas.style.width = window.innerWidth + "px";
+				canvas.style.height = window.innerHeight + "px";
+
+				// Метод getContext() возвращает контекст рисования на холсте
+				context = canvas.getContext("2d");
+				context.fillStyle = "rgb(0, 0, 0)";
+				context.fillRect (0, 0, WIDTH, HEIGHT);
+				// Метод getImageData() возвращает объект ImageData, который копирует пиксельные данные заданной прямоугольной области холста. 
+				image = context.getImageData(0, 0, WIDTH, HEIGHT);
+				data = image.data;
+
+				buffer1 = [];
+				buffer2 = [];
+				turbulence = [];
+
+				// Генерация
+				for (var i = 0; i < SIZE + WIDTH; i ++) {
+
+					buffer1[i] = 0;
+					buffer2[i] = 0;
+					turbulence[i] = Math.random();
+				}
+
+			}
+
+			// Отрисовка
+			function emit(x, y) {buffer1[ Math.floor(x) + (Math.floor(y) * WIDTH)] = 1000;}
+
+			// Функция, которая будет вызвана, когда придёт время обновить вашу анимацию на следующей перерисовке.
+			function animate() {
+
+				if (isUserInteracting) {
+
+					for (var i = 0; i < pointers.length; i++) {
+
+						emit(pointers[i][0], pointers[i][1]);
+
+					}
+				}
+
+				// Количество деталей
+				var iMax = WIDTH / 5;
+
+				for (var i = 0; i < iMax; i ++) {
+
+					emit(Math.random() * WIDTH, HEIGHT);
+
+				}
+
+				var i4, pixel;
+
+				// Палитра
+				for (var i = WIDTH; i < SIZE; i ++) {
+
+					i4 = i * 4;
+
+					pixel = buffer2[i] = ((buffer1[i - 1] + buffer1[i + 1]) * .235) + (buffer1[i + WIDTH] * turbulence[(i + count) % SIZE]);
+
+					data[ i4 ] = Math.min( 255, pixel << 3 );
+					data[ i4 + 1 ] = Math.min( 255, pixel );
+					data[ i4 + 2 ] = Math.min( 255, pixel >> 1 );
+				}
+
+				// Метод slice() возвращает новый массив, содержащий копию части исходного массива.
+				buffer1 = buffer2.slice(0);
+				// putImageData() рисует данные из заданного ImageData объекта на холст. 
+				context.putImageData(image, 0, 0);
+
+				count += Math.floor(Math.random() * SIZE);
+				// requestAnimationFrame указывает браузеру на то, что вы хотите произвести анимацию, и просит его запланировать перерисовку на следующем кадре анимации.
+				requestAnimationFrame(animate);
+
+			}
+
+			requestAnimationFrame(animate);
+
+		</script>
+	</body>
+</html>

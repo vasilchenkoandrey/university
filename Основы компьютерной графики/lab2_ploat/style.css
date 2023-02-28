@@ -1,0 +1,20 @@
+#canvas {
+  left: 0;
+  position: absolute;
+  top: 0;
+}
+
+.ui-draggable,
+.ui-droppable {
+  background-position: top;
+}
+
+#draggable {
+  background: #fff;
+  width: 150px;
+  box-shadow: 0 0 10px 5px rgba(221, 221, 221, 1);
+  border-radius: 10px;
+  padding: 5px;
+  left: 20%;
+  top: 100px;
+}
