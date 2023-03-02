@@ -1,5 +1,4 @@
 #include <iostream>
-#include <thread>
 #include <vector>
 #include <cstdlib>
 #include <ctime>
@@ -16,8 +15,8 @@ void init_matrix(int** A, int n) {
     }
 }
 
-void multiply_matrices(int** A, int** B, int** C, int n, int start, int end) {
-    for(int i=start; i<end; i++) {
+void multiply_matrices(int** A, int** B, int** C, int n) {
+    for(int i=0; i<n; i++) {
         for(int j=0; j<n; j++) {
             int sum = 0;
             for(int k=0; k<n; k++) {
@@ -29,51 +28,27 @@ void multiply_matrices(int** A, int** B, int** C, int n, int start, int end) {
 }
 
 int main() {
-    int sizes[] = {100, 200, 300, 400, 500, 600, 700};
+    int sizes[] = {10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 200, 300, 400, 500, 600, 700, 800, 900, 1000};
     const int num_sizes = sizeof(sizes) / sizeof(int);
 
     cout << "Matrix size\tTime taken (ms)\n";
 
     for(int i=0; i<num_sizes; i++) {
-        
         int n = sizes[i];
         
-        // Initialize matrices
         int** A = new int*[n];
         init_matrix(A, n);
-        
         int** B = new int*[n];
         init_matrix(B, n);
-        
         int** C = new int*[n];
         init_matrix(C, n);
-        
-        vector<int> time_taken;
-            
-        for(int test=0; test<=3; test++) {
+
+        double start_time = clock();
+        multiply_matrices(A, B, C, n);
+        double end_time = clock();
+        double time_taken = (end_time - start_time) / CLOCKS_PER_SEC * 1000;
     
-            // Multiply matrices and measure time
-            double start_time = clock();
-    
-            // Number of cores available
-            const int num_threads = thread::hardware_concurrency();
-            const int block_size = n / num_threads;
-    
-            vector<thread> threads;
-            for(int i=0; i<num_threads; i++) {
-                int start = i * block_size;
-                int end = (i == num_threads - 1) ? n : (i + 1) * block_size;
-                threads.emplace_back(multiply_matrices, A, B, C, n, start, end);
-            }
-    
-            for(auto& thread : threads) {
-                thread.join();
-            }
-    
-            double end_time = clock();
-            time_taken.emplace_back((end_time - start_time) / CLOCKS_PER_SEC * 1000);
-        }
-        cout << n << "\t\t" << time_taken[0] << "\t" << time_taken[1] << "\t" << time_taken[2] << "\t" << endl;
+        cout << n << "\t\t" << time_taken << endl;
     }
 
     return 0;
