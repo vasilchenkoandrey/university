@@ -1,5 +1,6 @@
 #include <iostream>
 #include <cmath>
+#include <cmath>
 
 using namespace std;
 
@@ -31,9 +32,8 @@ int main() {
     double whole = simpson(a, b);
 
     double result = adaptive_simpson(a, b, eps, whole);
-    double quarter_circle_area = result * 4.0;
 
-    cout << "The area of the quarter circle with radius 1 is: " << quarter_circle_area << endl;
+    cout << "The area of the quarter circle with radius 1 is: " << result << endl;
 
     return 0;
 }
