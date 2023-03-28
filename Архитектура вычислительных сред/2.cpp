@@ -57,12 +57,12 @@ int main() {
         // Number of cores available
         // const int num_threads = thread::hardware_concurrency();
         
-        auto start = std::chrono::system_clock::now();
+        auto start = chrono::system_clock::now();
         vector<thread> threads;
-        for(int i=0; i<num_threads; i++) {
+        for(int j=0; j<array_threads[i]; j++) {
             const int block_size = n / array_threads[i];
-            int start = i * block_size;
-            int end = (i == num_threads - 1) ? n : (i + 1) * block_size;
+            int start = j * block_size;
+            int end = (j == array_threads[i] - 1) ? n : (j + 1) * block_size;
             threads.emplace_back(multiply_matrices, A, B, C, n, start, end);
         }
 
@@ -71,10 +71,10 @@ int main() {
         }
 
         double end_time = clock();
-        auto end = std::chrono::system_clock::now();
-        std::chrono::duration<double> elapsed_seconds = end - start;
+        auto end = chrono::system_clock::now();
+        chrono::duration<double> elapsed_seconds = end - start;
      
-        cout << num_threads << "\t\t" << ((end_time - start_time) / CLOCKS_PER_SEC) << "  " << elapsed_seconds.count() << endl;
+        cout << array_threads[i] << "\t\t" << ((end_time - start_time) / CLOCKS_PER_SEC) << "  " << elapsed_seconds.count() << endl;
     }
 
     return 0;
