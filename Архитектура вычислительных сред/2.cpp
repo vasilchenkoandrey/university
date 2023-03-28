@@ -36,7 +36,7 @@ int main() {
     cout << "Matrix Size\tTime taken (ms)\n";
     
     for(int i=0; i<num_sizes; i++) {
-        const int n = sizes[i];
+        int n = sizes[i];
         
         int** A = new int*[n];
         init_matrix(A, n);
@@ -51,14 +51,14 @@ int main() {
 
         vector<thread> threads;
         auto start = std::chrono::system_clock::now();
-        for(int i=0; i<n; i++) {
-            threads.emplace_back(multiply_matrices, A, B, C, n, i, i+1);
+        for(int row=0; row<n; row++) {
+            threads.emplace_back(multiply_matrices, A, B, C, n, row, row+1);
         }
         for(auto& thread : threads) {
             thread.join();
         }
-        auto end = std::chrono::system_clock::now();
-        std::chrono::duration<double> elapsed_seconds = end - start;
+        auto end = chrono::system_clock::now();
+        chrono::duration<double> elapsed_seconds = end - start;
 
         cout << n << "x" << n << "\t\t" << elapsed_seconds.count() << endl;
     }
