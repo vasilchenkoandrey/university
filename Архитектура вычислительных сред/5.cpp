@@ -1,7 +1,6 @@
 #include <iostream>
-#include <thread>
-#include <vector>
 #include <cmath>
+#include <thread>
 
 using namespace std;
 
@@ -9,52 +8,39 @@ double f(double x) {
     return sqrt(1 - x * x);
 }
 
-double integrate(double a, double b, double eps) {
-    double h = b - a;
+double simpson(double a, double b) {
     double c = (a + b) / 2.0;
-    double fa = f(a);
-    double fb = f(b);
-    double fc = f(c);
-    double S = h / 6.0 * (fa + 4.0 * fc + fb);
-    return S;
+    return (f(a) + 4 * f(c) + f(b)) * (b - a) / 6.0;
 }
 
-void integrate_thread(double a, double b, double eps, double& result) {
-    result = integrate(a, b, eps);
-}
-
-double adaptive_integrate(double a, double b, double eps, int threads) {
-    double h = b - a;
+double adaptive_simpson(double a, double b, double eps, double whole) {
     double c = (a + b) / 2.0;
-    double fa = f(a);
-    double fb = f(b);
-    double fc = f(c);
-    double S = h / 6.0 * (fa + 4.0 * fc + fb);
-    double S1 = h / 12.0 * (fa + 4.0 * f((a + c) / 2.0) + 2.0 * fc + 4.0 * f((b + c) / 2.0) + fb);
-    double err = fabs(S1 - S) / 15.0;
-    if (err < eps) {
-        return S1;
-    }
-    else {
-        double S_left, S_right;
-        vector<double> results(2, 0.0);
-        vector<thread> thread_pool;
-        thread_pool.emplace_back([&]() { results[0] = adaptive_integrate(a, c, eps / 2.0, threads / 2); });
-        thread_pool.emplace_back([&]() { results[1] = adaptive_integrate(c, b, eps / 2.0, threads / 2); });
-        for (auto& thread : thread_pool) {
-            thread.join();
-        }
-        return results[0] + results[1];
+    double left, right;
+    thread left_thread, right_thread;
+
+    left_thread = thread([&]() { left = simpson(a, c); });
+    right_thread = thread([&]() { right = simpson(c, b); });
+
+    left_thread.join();
+    right_thread.join();
+
+    double result = left + right;
+
+    if (fabs(result - whole) <= 15 * eps) {
+        return result + (result - whole) / 15.0;
+    } else {
+        return adaptive_simpson(a, c, eps / 2.0, left) + adaptive_simpson(c, b, eps / 2.0, right);
     }
 }
 
 int main() {
-    const double R = 1.0;
-    double a = 0.0, b = R;
+    double a = 0.0, b = 1.0;
     double eps = 1e-6;
-    int threads = 4;
-    double result = adaptive_integrate(a, b, eps, threads);
-    double area = result * 4.0;
-    cout << "Area of quarter circle with radius " << R << " = " << area << endl;
+    double whole = simpson(a, b);
+
+    double result = adaptive_simpson(a, b, eps, whole);
+
+    cout << "The area of the quarter circle with radius 1 is: " << result << endl;
+
     return 0;
 }
