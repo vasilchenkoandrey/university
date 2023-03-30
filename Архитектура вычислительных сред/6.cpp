@@ -1,7 +1,7 @@
 #include <iostream>
-#include <future>
-#include <cmath>
+#include <thread>
 #include <vector>
+#include <cmath>
 #include <mutex>
 
 using namespace std;
@@ -10,64 +10,51 @@ double f(double x) {
     return sqrt(1 - x * x);
 }
 
-double simpson_integrate(double a, double b, double eps, mutex& mtx, int& num_threads, int& max_threads) {
-    double h = (b - a) / 2.0;
-    double fa = f(a);
-    double fb = f(b);
-    double fm = f((a + b) / 2.0);
-
-    double integral = h / 3.0 * (fa + 4.0 * fm + fb);
-
-    mtx.lock();
-    num_threads--;
-    if (num_threads > max_threads) {
-        max_threads = num_threads;
-    }
-    mtx.unlock();
-
-    return integral;
+double simpson(double a, double b) {
+    double c = (a + b) / 2.0;
+    return (f(a) + 4 * f(c) + f(b)) * (b - a) / 6.0;
 }
 
-double integral(double eps, int num_threads, int& max_threads) {
-    double a = 0.0;
-    double b = 1.0;
-    double h = (b - a) / num_threads;
-    mutex mtx;
+double adaptive_simpson(double a, double b, double eps, double whole, int& threads_count, mutex& mtx) {
+    double c = (a + b) / 2.0;
+    double left = simpson(a, c);
+    double right = simpson(c, b);
+    double result = left + right;
 
-    vector<future<double>> futures;
-    int working_threads = 0;
-
-    for (int i = 0; i < num_threads; ++i) {
-        double left = a + i * h;
-        double right = left + h;
-
-        futures.push_back(async(launch::async, simpson_integrate, left, right, eps, ref(mtx), ref(working_threads), ref(max_threads)));
-
-        mtx.lock();
-        working_threads++;
-        if (working_threads > max_threads) {
-            max_threads = working_threads;
-        }
-        mtx.unlock();
+    if (fabs(result - whole) <= 15 * eps) {
+        return result + (result - whole) / 15.0;
+    } else {
+        double result_left = 0.0, result_right = 0.0;
+        thread thread_left([&](){
+            mtx.lock();
+            threads_count++;
+            mtx.unlock();
+            result_left = adaptive_simpson(a, c, eps / 2.0, left, threads_count, mtx);
+        });
+        thread thread_right([&](){
+            mtx.lock();
+            threads_count++;
+            mtx.unlock();
+            result_right = adaptive_simpson(c, b, eps / 2.0, right, threads_count, mtx);
+        });
+        thread_left.join();
+        thread_right.join();
+        return result_left + result_right;
     }
-
-    double sum = 0.0;
-    for (int i = 0; i < num_threads; ++i) {
-        sum += futures[i].get();
-    }
-
-    return sum;
 }
 
 int main() {
+    double a = 0.0, b = 0.80;
     double eps = 1e-6;
-    int num_threads = 4;
-    int max_threads = num_threads;
+    double whole = simpson(a, b);
 
-    double res = integral(eps, num_threads, max_threads);
-    cout << "Integral: " << res << endl;
-    cout << "Limit thread: " << num_threads << endl;
-    cout << "Max threads: " << max_threads << endl;
+    int threads_count = 0;
+    mutex mtx;
+
+    double result = adaptive_simpson(a, b, eps, whole, threads_count, mtx);
+
+    cout << "The area of the quarter circle with radius 1 is: " << result << endl;
+    cout << "Threads count: " << threads_count << endl;
 
     return 0;
 }
